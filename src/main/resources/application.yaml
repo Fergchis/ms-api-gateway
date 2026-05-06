@@ -1,3 +1,29 @@
+server:
+  port: 8080
+
 spring:
   application:
     name: ms-api-gateway
+
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          use-framework-retry-filter: true
+          routes:
+            - id: ms-gestion-academica
+              uri: ${GESTION_ACADEMICA_URI:http://localhost:8081}
+              predicates:
+                - Path=/api/asignaturas/**,/api/cursos/**,/api/evaluaciones/**,/api/notas/**,/api/salasClase/**,/api/usuarios/**,/api/usuariosCurso/**
+              filters:
+                - Retry=2
+
+            - id: ms-asistencia
+              uri: ${ASISTENCIA_URI:http://localhost:8082}
+              predicates:
+                - Path=/api/asistencias/**,/api/anotaciones/**,/api/justificaciones/**
+              filters:
+                - Retry=2
+
+cors:
+  allowed-origins: http://localhost:5173

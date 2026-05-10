@@ -1,0 +1,20 @@
+services:
+  ms-api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ms-api-gateway:local
+    container_name: ms-api-gateway
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env.gateway
+    environment:
+      GESTION_ACADEMICA_URI: http://ms-gestion-academica:8081
+    networks:
+      - aulabo-network
+    restart: unless-stopped
+
+networks:
+  aulabo-network:
+    external: true

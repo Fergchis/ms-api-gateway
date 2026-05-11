@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Collections;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,18 +26,18 @@ public class FirebaseAuthFilter extends OncePerRequestFilter {
     private static final String BEARER_PREFIX = "Bearer ";
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+
+        return HttpMethod.OPTIONS.matches(request.getMethod()) || !path.startsWith("/api/");
+    }
+
+    @Override
     protected void doFilterInternal(
         HttpServletRequest request,
         HttpServletResponse response,
         FilterChain filterChain
     ) throws ServletException, IOException {
-
-        String path = request.getRequestURI();
-
-        if (!path.startsWith("/api/")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
 
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
@@ -59,8 +60,6 @@ public class FirebaseAuthFilter extends OncePerRequestFilter {
                 );
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            // TODO: Reenviar identidad del usuario a los microservicios cuando se definan roles y permisos.
 
             filterChain.doFilter(request, response);
 
